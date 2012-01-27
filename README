@@ -1,0 +1,2 @@
+This is a fractal viewer for the Mandelbrot set written in OpenGL
+which makes use of the OpenGL Shading Language (GLSL)
