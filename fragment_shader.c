@@ -1,5 +1,3 @@
-uniform float zoom;
-
 varying float x;
 varying float y;
 
@@ -12,7 +10,7 @@ void main(void)
     float i = 0.0;
     float rtemp = 0.0;
     float itemp = 0.0;
-    float iter_max = 200.0 * zoom;
+    float iter_max = 1000.0;
 
     while (iter < iter_max && square < max_square)
     {
