@@ -21,6 +21,8 @@
 #define FRAG_SHADER_FILE "fragment_shader.c"
 #define VERT_SHADER_FILE "vertex_shader.c"
 
+#define ZOOM_FACTOR 0.5
+
 GLuint vert, frag;
 GLuint program;
 
@@ -34,6 +36,8 @@ float h = 2.0;
 
 float win_w = 1024;
 float win_h = 768;
+
+float zoom_val = 1.0;
 
 void set_uniform_var(char *name, float val)
 {
@@ -154,6 +158,7 @@ void display()
     set_uniform_var("w", w);
     set_uniform_var("imaginary", imaginary);
     set_uniform_var("h", h);
+    set_uniform_var("zoom_factor", zoom_val);
 
     glBegin(GL_QUADS);
     glVertex3f(0.0, 0.0, 0.0);
@@ -175,6 +180,7 @@ void zoom(int button, int x, int y)
         w *= 0.5;
         imaginary += (float)y / win_h * h - h * 0.25;
         h *= 0.5;
+        zoom_val += ZOOM_FACTOR;
     }
     else
     {
@@ -182,6 +188,8 @@ void zoom(int button, int x, int y)
         w *= 2.0;
         imaginary += (float)y / win_h * h - h;
         h *= 2.0;
+        zoom_val -= ZOOM_FACTOR;
+        zoom_val = (zoom_val < 1.0) ? 1.0 : zoom_val;
     }
 
     glutPostRedisplay();
@@ -263,9 +271,6 @@ int main(int argc, char **argv)
     glutMotionFunc(motion);
     glutSpecialFunc(handle_keyboard_special);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
