@@ -1,4 +1,12 @@
 uniform float zoom_factor;
+uniform float min_real;
+uniform float max_real;
+uniform float min_imaginary;
+uniform float max_imaginary;
+uniform float height;
+uniform float width;
+uniform float real_factor;
+uniform float imaginary_factor;
 
 varying float x;
 varying float y;
@@ -14,11 +22,13 @@ void main(void)
     float itemp = 0.0;
     float iter_max = 200.0 * zoom_factor;
     float color_val;
+    float c_x = min_real + x * real_factor;
+    float c_y = max_imaginary - y * imaginary_factor;
 
     while (iter < iter_max && square < max_square)
     {
-        rtemp = r * r - i * i + x;
-        itemp = 2.0 * r * i + y;
+        rtemp = r * r - i * i + c_x;
+        itemp = 2.0 * r * i + c_y;
         r = rtemp;
         i = itemp;
         square = r * r + i * i;

@@ -21,21 +21,30 @@
 #define FRAG_SHADER_FILE "fragment_shader.c"
 #define VERT_SHADER_FILE "vertex_shader.c"
 
-#define ZOOM_FACTOR 0.5
+#define ZOOM_FACTOR 0
+
+#define MAX_IMAGINARY imaginary + (max_real - real) * win_h / win_w
+#define REAL_FACTOR (max_real - real) / (win_w - 1)
+#define IMAGINARY_FACTOR (max_imaginary - imaginary) / (win_h - 1)
 
 GLuint vert, frag;
 GLuint program;
 
+float win_w = 1024;
+float win_h = 768;
+
 int last_x = -1;
 int last_y = -1;
 
-float real = -2.0;
 float w = 3.0;
-float imaginary = -1.0;
 float h = 2.0;
 
-float win_w = 1024;
-float win_h = 768;
+float real = -2.0;
+float max_real = 1.0;
+float imaginary = -1.0;
+float max_imaginary;
+float real_factor;
+float imaginary_factor;
 
 float zoom_val = 1.0;
 
@@ -105,6 +114,7 @@ void compile_shader(GLuint shader, char *data)
             printf("%s\n", log);
             free(log);
         }
+        exit(1);
     }
 }
 
@@ -133,7 +143,10 @@ void link_shaders()
     glLinkProgram(program);
     glGetProgramiv(program, GL_LINK_STATUS, &res);
     if (res == GL_FALSE)
+    {
         printf("Linker failed cuz you suck?\n");
+        exit(1);
+    }
 }
 
 void init_shaders()
@@ -148,17 +161,35 @@ void init_shaders()
     link_shaders();
 }
 
-void display()
+void recalc_boundaries()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glLoadIdentity();
-    glUseProgram(program);
-    
+    max_imaginary = MAX_IMAGINARY;
+    real_factor = REAL_FACTOR;
+    imaginary_factor = IMAGINARY_FACTOR;
+}
+
+void set_uniform_vars()
+{
     set_uniform_var("real", real);
     set_uniform_var("w", w);
     set_uniform_var("imaginary", imaginary);
     set_uniform_var("h", h);
     set_uniform_var("zoom_factor", zoom_val);
+    set_uniform_var("min_real", real);
+    set_uniform_var("min_imaginary", imaginary);
+    set_uniform_var("height", win_h);
+    set_uniform_var("width", win_w);
+    set_uniform_var("real_factor", real_factor);
+    set_uniform_var("imaginary_factor", imaginary_factor);
+}
+
+void display()
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLoadIdentity();
+    glUseProgram(program);
+
+    set_uniform_vars();
 
     glBegin(GL_QUADS);
     glVertex3f(0.0, 0.0, 0.0);
@@ -174,9 +205,13 @@ void display()
 
 void zoom(int button, int x, int y)
 {
+    float real_offset;
+    
     if (button == GLUT_WHEEL_UP)
     {
-        real += (float)x / win_w * w - w * 0.25;
+        real_offset = (float)x / win_w * w - w * 0.25;
+        real += real_offset;
+        max_real -= real_offset;
         w *= 0.5;
         imaginary += (float)y / win_h * h - h * 0.25;
         h *= 0.5;
@@ -184,13 +219,17 @@ void zoom(int button, int x, int y)
     }
     else
     {
-        real += (float)x / win_w * w - w;
+        real_offset = (float)x / win_w * w - w;
+        real += real_offset;
+        max_real -= real_offset;
         w *= 2.0;
         imaginary += (float)y / win_h * h - h;
         h *= 2.0;
         zoom_val -= ZOOM_FACTOR;
         zoom_val = (zoom_val < 1.0) ? 1.0 : zoom_val;
     }
+
+    recalc_boundaries();
 
     glutPostRedisplay();
 }
@@ -265,7 +304,9 @@ int main(int argc, char **argv)
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
     glutInitWindowSize(win_w, win_h);
     glutCreateWindow("Mandlebrot Set");
-    
+
+    recalc_boundaries();
+
     glutDisplayFunc(display);
     glutMouseFunc(handle_mouse);
     glutMotionFunc(motion);
