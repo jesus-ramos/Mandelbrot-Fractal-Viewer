@@ -4,7 +4,7 @@ CFLAGS	= -Wall
 LD	= $(CC)
 ifeq ($(UNAME),Darwin)
 LDLIBS 	= -framework GLUT -framework OpenGL -lobjc
-LDFLAGS = #unused
+LDFLAGS =
 else
 LDLIBS 	= -lglut -lGL -lGLU -lX11 -lXmu -lXi -lm
 LDFLAGS = -I /usr/include/GL/ -L /usr/include/GL
@@ -27,7 +27,7 @@ depend : .depend
 
 include .depend
 
-.cpp.o :
+.c.o :
 	$(CC) $(CFLAGS) -c $<
 
 $(TARGET) : $(OBJS)
@@ -38,4 +38,4 @@ TAGS : $(SRCS)
 
 .PHONY : clean
 clean :
-	-$(RM) $(TARGET) $(OBJS) .depend TAGS
+	-$(RM) $(TARGET) $(OBJS) .depend
