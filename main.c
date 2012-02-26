@@ -259,6 +259,20 @@ void handle_keyboard_special(int key, int x, int y)
     zoom(val, win_w / 2, win_h / 2);
 }
 
+void handle_keyboard(unsigned char key, int x, int y)
+{
+    if (key == 'r')
+    {
+        real = -2.0;
+        w = 3.0;
+        imaginary = -1.0;
+        h = 2.0;
+        zoom_val = 1.0;
+    }
+
+    glutPostRedisplay();
+}
+
 int main(int argc, char **argv)
 {
     glutInit(&argc, argv);
@@ -270,6 +284,7 @@ int main(int argc, char **argv)
     glutMouseFunc(handle_mouse);
     glutMotionFunc(motion);
     glutSpecialFunc(handle_keyboard_special);
+    glutKeyboardFunc(handle_keyboard);
 
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glMatrixMode(GL_PROJECTION);
