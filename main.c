@@ -94,8 +94,6 @@ void compile_shader(GLuint shader, char *data)
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
     if (compiled == GL_FALSE)
     {
-        printf("Good job you broke the shader\n");
-
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &buff_len);
         if (buff_len > 1)
         {
@@ -104,6 +102,7 @@ void compile_shader(GLuint shader, char *data)
             glGetShaderInfoLog(shader, buff_len, &str_len, log);
             printf("%s\n", log);
             free(log);
+            exit(1);
         }
     }
 }
@@ -129,11 +128,14 @@ void create_shaders()
 void link_shaders()
 {
     GLint res;
-    
+
     glLinkProgram(program);
     glGetProgramiv(program, GL_LINK_STATUS, &res);
     if (res == GL_FALSE)
-        printf("Linker failed cuz you suck?\n");
+    {
+        printf("Shader linking failed\n");
+        exit(1);
+    }
 }
 
 void init_shaders()
@@ -153,7 +155,7 @@ void display()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
     glUseProgram(program);
-    
+
     set_uniform_var("real", real);
     set_uniform_var("w", w);
     set_uniform_var("imaginary", imaginary);
@@ -166,7 +168,7 @@ void display()
     glVertex3f(win_w, win_h, 0.0);
     glVertex3f(win_w, 0.0, 0.0);
     glEnd();
-    
+
     glUseProgram(0);
 
     glutSwapBuffers();
@@ -243,7 +245,7 @@ void motion(int x, int y)
 void handle_keyboard_special(int key, int x, int y)
 {
     GLint val;
-    
+
     switch (key)
     {
         case GLUT_KEY_UP:
@@ -279,7 +281,7 @@ int main(int argc, char **argv)
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
     glutInitWindowSize(win_w, win_h);
     glutCreateWindow("Mandlebrot Set");
-    
+
     glutDisplayFunc(display);
     glutMouseFunc(handle_mouse);
     glutMotionFunc(motion);
@@ -291,7 +293,7 @@ int main(int argc, char **argv)
     glLoadIdentity();
     glOrtho(0.0, win_w, 0.0, win_h, 0, 0.01);
     glMatrixMode(GL_MODELVIEW);
-    
+
     init_shaders();
 
     glutMainLoop();

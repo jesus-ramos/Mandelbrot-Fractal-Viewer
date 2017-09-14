@@ -12,7 +12,7 @@ void main(void)
     float i = 0.0;
     float rtemp = 0.0;
     float itemp = 0.0;
-    float iter_max = 200.0 * zoom_factor;
+    float iter_max = 255.0;
     float color_val;
 
     while (iter < iter_max && square < max_square)
